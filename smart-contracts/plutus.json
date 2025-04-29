@@ -1,0 +1,248 @@
+{
+  "preamble": {
+    "title": "AgriTraceChain Smart Contracts",
+    "description": "Smart contracts for agricultural product traceability on Cardano blockchain",
+    "version": "1.0.0",
+    "plutusVersion": "v2",
+    "license": "Apache-2.0"
+  },
+  "validators": [
+    {
+      "title": "Product Registration",
+      "file": "./contracts/product-registration.ak",
+      "compiledFile": "./compiled/product-registration.plutus",
+      "datum": {
+        "title": "ProductDatum",
+        "schema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "productId": {
+              "type": "string",
+              "description": "Unique identifier for the product"
+            },
+            "farmerAddress": {
+              "type": "string",
+              "description": "Cardano address of the farmer/producer"
+            },
+            "productName": {
+              "type": "string",
+              "description": "Name of the agricultural product"
+            },
+            "productType": {
+              "type": "string",
+              "description": "Type of agricultural product (e.g., Grain, Vegetable)"
+            },
+            "quantity": {
+              "type": "integer",
+              "description": "Quantity of the product"
+            },
+            "unit": {
+              "type": "string",
+              "description": "Unit of measurement (e.g., kg, ton)"
+            },
+            "location": {
+              "type": "string",
+              "description": "Production location"
+            },
+            "harvestDate": {
+              "type": "integer",
+              "description": "UNIX timestamp of harvest date"
+            },
+            "certifications": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of certifications (e.g., Organic, Pesticide-Free)"
+            },
+            "registrationDate": {
+              "type": "integer",
+              "description": "UNIX timestamp of registration date"
+            }
+          },
+          "required": [
+            "productId",
+            "farmerAddress",
+            "productName",
+            "productType",
+            "quantity",
+            "unit",
+            "location",
+            "harvestDate",
+            "registrationDate"
+          ]
+        }
+      },
+      "redeemer": {
+        "title": "ProductRedeemer",
+        "schema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": ["register", "update", "transfer", "verify"],
+              "description": "Action to perform on the product"
+            },
+            "newOwner": {
+              "type": "string",
+              "description": "New owner address for transfer action"
+            },
+            "updateFields": {
+              "type": "object",
+              "description": "Fields to update for update action"
+            },
+            "verifier": {
+              "type": "string",
+              "description": "Address of the verifier for verify action"
+            }
+          },
+          "required": ["action"]
+        }
+      }
+    },
+    {
+      "title": "Supply Chain Tracking",
+      "file": "./contracts/supply-chain.ak",
+      "compiledFile": "./compiled/supply-chain.plutus",
+      "datum": {
+        "title": "SupplyChainDatum",
+        "schema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "productId": {
+              "type": "string",
+              "description": "Unique identifier for the product"
+            },
+            "currentStatus": {
+              "type": "string",
+              "enum": ["Harvested", "Processing", "Distribution", "Retail", "Sold"],
+              "description": "Current status in the supply chain"
+            },
+            "currentLocation": {
+              "type": "string",
+              "description": "Current location of the product"
+            },
+            "currentHandler": {
+              "type": "string",
+              "description": "Cardano address of the current handler"
+            },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "handler": {
+                    "type": "string"
+                  },
+                  "timestamp": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "description": "History of status changes"
+            },
+            "lastUpdated": {
+              "type": "integer",
+              "description": "UNIX timestamp of last update"
+            }
+          },
+          "required": ["productId", "currentStatus", "currentLocation", "currentHandler", "lastUpdated"]
+        }
+      },
+      "redeemer": {
+        "title": "SupplyChainRedeemer",
+        "schema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": ["update", "transfer", "complete"],
+              "description": "Action to perform on the supply chain"
+            },
+            "newStatus": {
+              "type": "string",
+              "description": "New status for update action"
+            },
+            "newLocation": {
+              "type": "string",
+              "description": "New location for update action"
+            },
+            "newHandler": {
+              "type": "string",
+              "description": "New handler address for transfer action"
+            }
+          },
+          "required": ["action"]
+        }
+      }
+    },
+    {
+      "title": "Payment Contract",
+      "file": "./contracts/payment.ak",
+      "compiledFile": "./compiled/payment.plutus",
+      "datum": {
+        "title": "PaymentDatum",
+        "schema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "productId": {
+              "type": "string",
+              "description": "Unique identifier for the product"
+            },
+            "sellerAddress": {
+              "type": "string",
+              "description": "Cardano address of the seller"
+            },
+            "price": {
+              "type": "integer",
+              "description": "Price in lovelace (1 ADA = 1,000,000 lovelace)"
+            },
+            "deadline": {
+              "type": "integer",
+              "description": "UNIX timestamp of payment deadline"
+            },
+            "isPaid": {
+              "type": "boolean",
+              "description": "Whether the payment has been made"
+            }
+          },
+          "required": ["productId", "sellerAddress", "price", "deadline", "isPaid"]
+        }
+      },
+      "redeemer": {
+        "title": "PaymentRedeemer",
+        "schema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": ["pay", "refund", "cancel"],
+              "description": "Action to perform on the payment"
+            },
+            "buyerAddress": {
+              "type": "string",
+              "description": "Cardano address of the buyer"
+            },
+            "paymentAmount": {
+              "type": "integer",
+              "description": "Amount paid in lovelace"
+            }
+          },
+          "required": ["action"]
+        }
+      }
+    }
+  ]
+}
