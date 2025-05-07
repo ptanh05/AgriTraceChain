@@ -17,6 +17,7 @@ export default function Login() {
   const [loading, setLoading] = useState<boolean>(false);
   const [walletAvailable, setWalletAvailable] = useState<{ id: string; name: string; icon: string }[] | undefined>();
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null); 
+  const { connectWallet } = useWallet();
 
   useEffect(() => {
     async function getW() {
@@ -26,7 +27,7 @@ export default function Login() {
     getW();
   }, []);
 
-  async function connectWallet() {
+  async function connectWallet2() {
     if (!selectedWallet) return;
     try {
       setLoading(true);
@@ -69,6 +70,7 @@ export default function Login() {
           console.log('Response:', response.data);
 
           if (response.data.role != undefined) {
+            connectWallet("x");
             console.log('Role:', response.data.role);
             router.push('/dashboard');
           } else {
@@ -115,7 +117,7 @@ export default function Login() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button className="w-full" onClick={connectWallet} disabled={!selectedWallet || loading}>
+          <Button className="w-full" onClick={connectWallet2} disabled={!selectedWallet || loading}>
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
