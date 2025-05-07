@@ -1,35 +1,94 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useWallet } from "@/context/wallet-context"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Wallet, Loader2 } from "lucide-react"
+import React, { useEffect, useState } from 'react';
+import { BrowserWallet, Wallet } from '@meshsdk/core';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Loader2, Wallet as WalletIcon } from 'lucide-react';
+import { useWallet } from '@/context/wallet-context';
 
-export default function ConnectWalletPage() {
-  const router = useRouter()
-  const { connectWallet, isConnected, isLoading } = useWallet()
-  const [selectedWallet, setSelectedWallet] = useState<string | null>(null)
+export default function Login() {
+  const router = useRouter();
+  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string>('');
+  const [connected, setConnected] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [walletAvailable, setWalletAvailable] = useState<{ id: string; name: string; icon: string }[] | undefined>();
+  const [selectedWallet, setSelectedWallet] = useState<string | null>(null); 
+  const { connectWallet } = useWallet();
 
-  const wallets = [
-    { id: "nami", name: "Nami Wallet", logo: "N" },
-    { id: "eternl", name: "Eternl Wallet", logo: "E" },
-    { id: "lace", name: "Lace Wallet", logo: "L" },
-  ]
+  useEffect(() => {
+    async function getW() {
+      const availableWallets = await BrowserWallet.getAvailableWallets();
+      setWalletAvailable(availableWallets);
+    }
+    getW();
+  }, []);
 
-  const handleConnect = async () => {
-    if (!selectedWallet) return
+  async function connectWallet2() {
+    if (!selectedWallet) return;
+    try {
+      setLoading(true);
+      const walletInstance = await BrowserWallet.enable(selectedWallet);
+      setWallet(walletInstance);
 
-    await connectWallet(selectedWallet)
-    router.push("/dashboard")
+      const address = await walletInstance.getChangeAddress();
+      setWalletAddress(address);
+      setConnected(true);
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      alert('Please install a compatible wallet like Nami or Eternl!');
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // If already connected, redirect to dashboard
-  if (isConnected && !isLoading) {
-    router.push("/dashboard")
-    return null
-  }
+  useEffect(() => {
+    const authenticate = async () => {
+      if (connected && wallet) {
+        setLoading(true);
+        try {
+          const { data: { nonce } } = await axios.get(`/api/login/getNonce?addressWallet=${walletAddress}`);
+          const signedMessage = await wallet.signData(nonce);
+          const { data: { accessToken } } = await axios.post('/api/login/verifySignature', {
+            addressWallet: walletAddress,
+            signature: signedMessage,
+            nonce: nonce,
+          });
+
+          console.log('Access Token:', accessToken);
+
+          localStorage.setItem('accessToken', accessToken);
+
+          const response = await axios.get('/api/checkAddressWallet', {
+            params: { addressWallet: walletAddress },
+            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          });
+
+          console.log('Response:', response.data);
+
+          if (response.data.role != undefined) {
+            connectWallet("x");
+            console.log('Role:', response.data.role);
+            router.push('/dashboard');
+          } else {
+            alert('Account not registered. Please create a new account.');
+            router.push('/register');
+          }
+        } catch (error) {
+          setConnected(false);
+          console.error('Authentication failed:', error);
+          alert('Authentication failed!');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    authenticate();
+  }, [connected, wallet, walletAddress, router]);
 
   return (
     <div className="container max-w-md py-12">
@@ -40,16 +99,16 @@ export default function ConnectWalletPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4">
-            {wallets.map((wallet) => (
+            {walletAvailable?.map((wallet) => (
               <Button
                 key={wallet.id}
-                variant={selectedWallet === wallet.id ? "default" : "outline"}
+                variant={selectedWallet === wallet.id ? 'default' : 'outline'}
                 className="flex justify-start h-16"
                 onClick={() => setSelectedWallet(wallet.id)}
               >
                 <div className="flex items-center w-full gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    {wallet.logo}
+                    <img src={wallet.icon} alt={wallet.name} className="h-6 w-6" />
                   </div>
                   <div className="font-medium">{wallet.name}</div>
                 </div>
@@ -58,15 +117,15 @@ export default function ConnectWalletPage() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button className="w-full" onClick={handleConnect} disabled={!selectedWallet || isLoading}>
-            {isLoading ? (
+          <Button className="w-full" onClick={connectWallet2} disabled={!selectedWallet || loading}>
+            {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Connecting...
               </>
             ) : (
               <>
-                <Wallet className="mr-2 h-4 w-4" />
+                <WalletIcon className="mr-2 h-4 w-4" />
                 Connect Wallet
               </>
             )}
@@ -74,5 +133,5 @@ export default function ConnectWalletPage() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

@@ -13,17 +13,6 @@ export default function DashboardPage() {
   const router = useRouter()
   const { isConnected, walletAddress, walletType, balance } = useWallet()
 
-  // Redirect to connect wallet page if not connected
-  useEffect(() => {
-    if (!isConnected) {
-      router.push("/connect-wallet")
-    }
-  }, [isConnected, router])
-
-  if (!isConnected) {
-    return null
-  }
-
   return (
     <div className="container py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
