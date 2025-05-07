@@ -94,34 +94,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="divide-y">
                   {[
-                    {
-                      id: "1",
-                      name: "Organic Rice",
-                      type: "Grain",
-                      date: "2023-04-15",
-                      status: "Active",
-                    },
-                    {
-                      id: "2",
-                      name: "Fresh Tomatoes",
-                      type: "Vegetable",
-                      date: "2023-04-12",
-                      status: "In Transit",
-                    },
-                    {
-                      id: "3",
-                      name: "Coffee Beans",
-                      type: "Beans",
-                      date: "2023-04-10",
-                      status: "Active",
-                    },
-                    {
-                      id: "4",
-                      name: "Honey",
-                      type: "Sweetener",
-                      date: "2023-04-05",
-                      status: "Sold",
-                    },
+                    
                   ].map((product) => (
                     <div key={product.id} className="grid grid-cols-5 items-center p-4 text-sm">
                       <div className="font-medium">{product.name}</div>
