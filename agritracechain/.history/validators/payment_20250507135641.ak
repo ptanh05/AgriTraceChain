@@ -26,7 +26,7 @@ validator payment{
                 signByBuyer?
         }
         "getPaid"-> {
-                signByShopper?
+                key_signed(extra_signatories, datum.shopper)?
         }
         _-> fail
        

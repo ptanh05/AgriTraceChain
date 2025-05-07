@@ -23,10 +23,10 @@ validator payment{
        let signByShopper = key_signed(extra_signatories, datum.shopper)
        when redeemer.action is{
         "refund"-> {
-                signByBuyer?
+                
         }
         "getPaid"-> {
-                signByShopper?
+                key_signed(extra_signatories, datum.shopper)?
         }
         _-> fail
        

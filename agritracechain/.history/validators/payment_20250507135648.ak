@@ -26,7 +26,7 @@ validator payment{
                 signByBuyer?
         }
         "getPaid"-> {
-                signByShopper?
+                signByShopper
         }
         _-> fail
        
