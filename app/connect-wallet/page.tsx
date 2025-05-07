@@ -70,12 +70,18 @@ export default function Login() {
           console.log('Response:', response.data);
 
           if (response.data.role != undefined) {
-            connectWallet("x");
+            connectWallet(walletAddress);
             console.log('Role:', response.data.role);
-            router.push('/dashboard');
+            if(response.data.role == 0) {
+              router.push('/farm/dashboard');
+            } else if(response.data.role == 1) {
+              router.push('/logistics/dashboard');
+            } else if(response.data.role == 2) {
+              router.push('/product/dashboard');
+            }
           } else {
-            alert('Account not registered. Please create a new account.');
-            router.push('/register');
+            alert('Account not registered. Please contact the administrator to create a new account.');
+            router.push('/');
           }
         } catch (error) {
           setConnected(false);

@@ -24,13 +24,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const savedWalletType = localStorage.getItem("walletType")
     const savedWalletAddress = localStorage.getItem("walletAddress")
+    // convert string if address is addr1qasdasd to addr...asd
+    const savedWalletAddressShort = savedWalletAddress?.slice(0, 5) + "..." + savedWalletAddress?.slice(-3)
+    const savedBalance = localStorage.getItem("balance")
 
     if (savedWalletType && savedWalletAddress) {
       setWalletType(savedWalletType)
-      setWalletAddress(savedWalletAddress)
+      setWalletAddress(savedWalletAddressShort)
       // In a real implementation, we would verify the connection is still valid
       // and fetch the current balance
-      setBalance(Math.random() * 1000) // Mock balance for demo
+      setBalance(savedBalance ? parseFloat(savedBalance) : null)
     }
   }, [])
 
@@ -46,11 +49,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
       setWalletAddress(mockAddress)
       setWalletType(type)
-      setBalance(Math.random() * 1000) // Mock balance
+      setBalance(balance)
 
       // Save to localStorage for persistence
       localStorage.setItem("walletType", type)
       localStorage.setItem("walletAddress", mockAddress)
+
 
       // In a real implementation, we would also authenticate with the backend
       // by sending the wallet address and a signed message
@@ -67,6 +71,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setBalance(null)
     localStorage.removeItem("walletType")
     localStorage.removeItem("walletAddress")
+    localStorage.removeItem("balance")
   }
 
   return (
