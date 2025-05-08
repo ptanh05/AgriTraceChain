@@ -1,7 +1,8 @@
 "use client"
 
 import { toast } from "@/components/ui/use-toast"
-
+import { decrypt, encrypt } from "@/utils/crypto";
+import * as bip39 from "bip39";
 // This is a mock service that simulates blockchain interactions
 // In a real implementation, this would use Cardano SDK libraries
 
@@ -56,29 +57,27 @@ class BlockchainService {
   }
 
   // Register a new product on the blockchain
-  async registerProduct(
-    productData: ProductData,
-    walletAddress: string,
-  ): Promise<{ txHash: string; productId: string }> {
+  async registerProduct(): Promise<{ mnemonic: string[] }> {
     try {
-      console.log("Registering product on blockchain:", productData)
-      // In a real implementation, this would create a transaction using the Cardano SDK
-      // and submit it to the blockchain using the product-registration.ak contract
+      // Tạo 24 từ khóa mnemonic (entropy 256 bits)
+      const mnemonic = bip39.generateMnemonic(256); // 24 từ
+      const mnemonicWords = mnemonic.split(" ");
 
-      // Simulate blockchain transaction delay
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      console.log("🌐 Ví mới đã được tạo:");
+      console.log("🧠 24 từ khóa bảo mật (mnemonic):", mnemonicWords.join(" "));
 
-      // Generate mock transaction hash and product ID
-      const txHash = `tx_${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 10)}`
-      const productId = `prod_${Math.random().toString(36).substring(2, 6)}`
+      const encryptedMnemonic = encrypt(mnemonic);
+      console.log("🧠 24 từ khóa bảo mật (mnemonic):", encryptedMnemonic);
+
+      const decryptedMnemonic = decrypt(encryptedMnemonic);
+      console.log("🧠 24 từ khóa bảo mật (mnemonic):", decryptedMnemonic);
 
       return {
-        txHash,
-        productId,
-      }
+        mnemonic: mnemonicWords,
+      };
     } catch (error) {
-      console.error("Error registering product:", error)
-      throw new Error("Failed to register product on blockchain")
+      console.error("❌ Lỗi khi tạo ví mới:", error);
+      throw new Error("Không thể tạo ví mới");
     }
   }
 
@@ -231,23 +230,19 @@ class BlockchainService {
   }
 
   // Helper method to show toast notifications for blockchain operations
-  showBlockchainToast(type: "success" | "error" | "loading", title: string, description: string, txHash?: string) {
-    if (type === "success") {
-      toast({
-        title,
-        description: (
-          <div>
-            {description}
-            {txHash && (
-              <p className="mt-2 text-xs font-mono">
-                Transaction Hash: <span className="font-semibold">{txHash}</span>
-              </p>
-            )}
-          </div>
-        ),
-      })
-    } else if (type === "error") {
-      toast({
+  showBlockchainToast(
+  type: "success" | "error" | "loading",
+  title: string,
+  description: string,
+  txHash?: string
+) {
+  if (type === "success") {
+    toast({
+      title,
+      description,
+    })
+  } else if (type === "error") {
+    toast({
         title,
         description,
         variant: "destructive",

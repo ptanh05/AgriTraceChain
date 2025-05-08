@@ -69,7 +69,7 @@ export default function Login() {
 
           console.log('Response:', response.data);
           const tien = await wallet.getBalance();
-          localStorage.setItem('balance', tien);
+          localStorage.setItem('balance', tien.toString());
           console.log('Tien:', tien);
 
           if (response.data.role != undefined) {

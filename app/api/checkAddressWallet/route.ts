@@ -15,7 +15,7 @@ export async function GET(req: Request, res: Response) {
     }
 
     try {
-        const farm = await Farm.findOne({ addressWallet: "addr1qxls7872th5sfmaym894c3637sy5tf4xzdq7c2nqgc5vg5fsd6ndsnedl4546qx357z0q5dd73kztmsqzvz092w4jtgq3zkzvw" })
+        const farm = await Farm.findOne({ addressWallet: addressWallet })
         const logistics = await Logistics.findOne({ addressWallet });
         const product = await Product.findOne({ addressWallet });
         const store = await Store.findOne({ addressWallet });
