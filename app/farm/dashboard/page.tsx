@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useWallet } from "@/context/wallet-context"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,17 @@ import Link from "next/link"
 export default function DashboardPage() {
   const router = useRouter()
   const { isConnected, walletAddress, walletType, balance } = useWallet()
+  const [mockProducts, setMockProducts] = useState([])
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const response = await fetch("/api/products")
+      const data = await response.json()
+      setMockProducts(data)
+      console.log(data)
+    }
+    fetchProducts()
+  }, [])
 
   return (
     <div className="container py-8">
@@ -67,11 +78,10 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{balance?.toFixed(2) || "0.00"} ₳</div>
             <p className="text-xs text-muted-foreground">
-  {walletAddress
-    ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)} Wallet`
-    : 'No Wallet'}
-</p>
-
+              {walletAddress
+                ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)} Wallet`
+                : 'No Wallet'}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -98,13 +108,11 @@ export default function DashboardPage() {
                   <div className="text-right">Actions</div>
                 </div>
                 <div className="divide-y">
-                  {[
-                    
-                  ].map((product) => (
-                    <div key={product.id} className="grid grid-cols-5 items-center p-4 text-sm">
+                  {mockProducts.map((product) => (
+                    <div key={product._id} className="grid grid-cols-5 items-center p-4 text-sm">
                       <div className="font-medium">{product.name}</div>
                       <div>{product.type}</div>
-                      <div>{product.date}</div>
+                      <div>{product.createdAt}</div>
                       <div>
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
@@ -120,7 +128,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="text-right">
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/products/${product.id}`}>View</Link>
+                          <Link href={`/products/${product._id}`}>View</Link>
                         </Button>
                       </div>
                     </div>

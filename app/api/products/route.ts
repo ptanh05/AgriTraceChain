@@ -7,15 +7,51 @@ let products: any[] = []
 export async function GET(request: Request) {
   await connectMongo();
   const { searchParams } = new URL(request.url);
-  const ownerAddress = searchParams.get('ownerAddress');
+  
+  // Build query object based on available search parameters
+  const query: any = {};
+  
+  // Basic product information
+  if (searchParams.get('name')) query.name = searchParams.get('name');
+  if (searchParams.get('type')) query.type = searchParams.get('type');
+  if (searchParams.get('location')) query.location = searchParams.get('location');
+  
+  // Numeric fields
+  if (searchParams.get('quantity')) query.quantity = parseInt(searchParams.get('quantity') || '0');
+  
+  // Date range queries
+  if (searchParams.get('createdAtStart')) {
+    query.createdAt = { $gte: new Date(searchParams.get('createdAtStart') || '') };
+  }
+  if (searchParams.get('createdAtEnd')) {
+    query.createdAt = { ...query.createdAt, $lte: new Date(searchParams.get('createdAtEnd') || '') };
+  }
+  
+  // Farmer information
+  if (searchParams.get('farmerName')) {
+    query['farmer.name'] = searchParams.get('farmerName');
+  }
+  if (searchParams.get('farmerWalletAddress')) {
+    query['farmer.walletAddress'] = searchParams.get('farmerWalletAddress');
+  }
+  
+  // Transport history
+  if (searchParams.get('transportStatus')) {
+    query['transportHistory.status'] = searchParams.get('transportStatus');
+  }
+  if (searchParams.get('transportLocation')) {
+    query['transportHistory.location'] = searchParams.get('transportLocation');
+  }
+  
+  // Certifications
+  if (searchParams.get('certification')) {
+    query.certifications = searchParams.get('certification');
+  }
 
-  const products = await Product.find({ owner: ownerAddress });
+  const products = await Product.find(query);
   return NextResponse.json(products);
 }
 
-export async function GET() {
-  return NextResponse.json(products)
-}
 
 export async function POST(request: Request) {
   try {

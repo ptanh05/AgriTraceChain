@@ -74,21 +74,20 @@ const mockProducts = [
 
 export default function ProductsPage() {
   const router = useRouter()
-  const { isConnected } = useWallet()
+  const [mockProducts, setMockProducts] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
 
-  // Redirect to connect wallet page if not connected
   useEffect(() => {
-    if (!isConnected) {
-      router.push("/connect-wallet")
+    const fetchProducts = async () => {
+      const response = await fetch("/api/products")
+      const data = await response.json()
+      setMockProducts(data)
+      console.log(data)
     }
-  }, [isConnected, router])
-
-  if (!isConnected) {
-    return null
-  }
+    fetchProducts()
+  }, [])
 
   // Filter products based on search term and filters
   const filteredProducts = mockProducts.filter((product) => {
@@ -181,7 +180,7 @@ export default function ProductsPage() {
         <div className="divide-y">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
-              <div key={product.id} className="grid grid-cols-1 md:grid-cols-7 items-center p-4 text-sm">
+              <div key={product._id} className="grid grid-cols-1 md:grid-cols-7 items-center p-4 text-sm">
                 <div className="md:col-span-2 font-medium">{product.name}</div>
                 <div className="hidden md:block">{product.type}</div>
                 <div className="hidden md:block">{product.quantity}</div>
@@ -201,7 +200,7 @@ export default function ProductsPage() {
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" size="icon" asChild>
-                    <Link href={`/products/${product.id}`}>
+                    <Link href={`/products/${product._id}`}>
                       <QrCode className="h-4 w-4" />
                       <span className="sr-only">View QR</span>
                     </Link>
@@ -217,16 +216,16 @@ export default function ProductsPage() {
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href={`/products/${product.id}`}>View Details</Link>
+                        <Link href={`/products/${product._id}`}>View Details</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href={`/products/edit/${product.id}`}>
+                        <Link href={`/products/edit/${product._id}`}>
                           <Pencil className="mr-2 h-4 w-4" />
                           Edit Product
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href={`/products/transport/${product.id}`}>Update Status</Link>
+                        <Link href={`/products/transport/${product._id}`}>Update Status</Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-destructive">
