@@ -25,19 +25,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const savedWalletType = localStorage.getItem("walletType")
     const savedWalletAddress = localStorage.getItem("walletAddress")
     // convert string if address is addr1qasdasd to addr...asd
-    const savedWalletAddressShort = savedWalletAddress?.slice(0, 5) + "..." + savedWalletAddress?.slice(-3)
     const savedBalance = localStorage.getItem("balance")
 
     if (savedWalletType && savedWalletAddress) {
       setWalletType(savedWalletType)
-      setWalletAddress(savedWalletAddressShort)
+      setWalletAddress(savedBalance)
       // In a real implementation, we would verify the connection is still valid
       // and fetch the current balance
       setBalance(savedBalance ? parseFloat(savedBalance) : null)
     }
   }, [])
 
-  const connectWallet = async (type: string) => {
+  const connectWallet = async (type: string, address: string) => {
     setIsLoading(true)
     try {
       // In a real implementation, this would use the actual Cardano wallet APIs
@@ -45,7 +44,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API delay
 
       // Generate a mock wallet address based on the wallet type
-      const mockAddress = `addr1q${type.toLowerCase()}${Math.random().toString(36).substring(2, 10)}...`
+      const mockAddress = address;
 
       setWalletAddress(mockAddress)
       setWalletType(type)
@@ -54,6 +53,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       // Save to localStorage for persistence
       localStorage.setItem("walletType", type)
       localStorage.setItem("walletAddress", mockAddress)
+      localStorage.setItem("balance", balance)
 
 
       // In a real implementation, we would also authenticate with the backend

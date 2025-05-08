@@ -66,7 +66,12 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{balance?.toFixed(2) || "0.00"} ₳</div>
-            <p className="text-xs text-muted-foreground">{walletAddress} Wallet</p>
+            <p className="text-xs text-muted-foreground">
+  {walletAddress
+    ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)} Wallet`
+    : 'No Wallet'}
+</p>
+
           </CardContent>
         </Card>
       </div>
