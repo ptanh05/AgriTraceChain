@@ -68,9 +68,12 @@ export default function Login() {
           });
 
           console.log('Response:', response.data);
+          const tien = await wallet.getBalance();
+          localStorage.setItem('balance', tien);
+          console.log('Tien:', tien);
 
           if (response.data.role != undefined) {
-            connectWallet(walletAddress);
+            connectWallet("lace", walletAddress);
             console.log('Role:', response.data.role);
             if(response.data.role == 0) {
               router.push('/farm/dashboard');
