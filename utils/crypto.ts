@@ -1,8 +1,4 @@
 import * as crypto from 'crypto';
-import dotenv from 'dotenv';
-
-// Load biến môi trường
-dotenv.config();
 
 const ALGORITHM = 'aes-256-cbc';
 const KEY = "12345678901234567890123456789012";

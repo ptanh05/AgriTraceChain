@@ -30,7 +30,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (savedWalletType && savedWalletAddress) {
       setWalletType(savedWalletType)
       setWalletAddress(savedWalletAddress)
-      setBalance(savedBalance[0].quantity)
+      setBalance(savedBalance ? parseInt(savedBalance) : null)
     }
   }, [])
 
