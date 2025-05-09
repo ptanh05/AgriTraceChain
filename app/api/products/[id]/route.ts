@@ -1,4 +1,6 @@
-import { NextResponse } from "next/server"
+import Product from "@/models/Product"
+import connectMongo from "@/configs/mongoConfig"
+import { NextRequest, NextResponse } from "next/server"
 
 // Mock database for products (same as in the products route)
 const products = [
@@ -86,14 +88,23 @@ const products = [
   },
 ]
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const product = products.find((p) => p.id === params.id)
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  
+  const { id } = await params;
+
+  const product = await Product.findOne({ _id: id })
 
   if (!product) {
-    return NextResponse.json({ error: "Product not found" }, { status: 404 })
+    return new Response('Product not found', { status: 404 })
   }
 
-  return NextResponse.json(product)
+  return new Response(JSON.stringify(product), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  })
 }
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {

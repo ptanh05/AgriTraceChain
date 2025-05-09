@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, QrCode, Truck, Leaf, Calendar, Map, ExternalLink, Clock, ShieldCheck, Download } from "lucide-react"
+import { useParams } from "next/navigation"
 
 // Mock product data - in a real app, this would come from an API call
 const mockProductDetails = {
@@ -55,39 +56,30 @@ const mockProductDetails = {
   certifications: ["Organic", "Pesticide-Free", "Sustainable Farming"],
 }
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
+export default function ProductDetailPage() {
   const router = useRouter()
   const { isConnected } = useWallet()
-  const [product, setProduct] = useState(mockProductDetails)
+  const [product, setProduct] = useState()
   const [isLoading, setIsLoading] = useState(true)
+  const id = useParams().id;
 
   // Redirect to connect wallet page if not connected
   useEffect(() => {
-    if (!isConnected) {
-      router.push("/connect-wallet")
-      return
-    }
 
     // In a real app, fetch product data from API
     const fetchProduct = async () => {
-      try {
-        setIsLoading(true)
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        // In a real app, we would fetch the product data using the ID
-        // For now, we'll use the mock data
-        setProduct(mockProductDetails)
-      } catch (error) {
-        console.error("Error fetching product:", error)
-      } finally {
-        setIsLoading(false)
-      }
+      setIsLoading(true)
+      const response = await fetch(`/api/products/${id}`)
+      const data = await response.json()
+      setProduct(data)
+      console.log(data)
+      setIsLoading(false)
     }
 
     fetchProduct()
-  }, [isConnected, router, params.id])
+  }, [])
 
-  if (!isConnected || isLoading) {
+  if (isLoading) {
     return null
   }
 
@@ -121,22 +113,15 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   <p>{product.quantity}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Price</p>
-                  <p>{product.price} ₳ per kg</p>
-                </div>
-                <div className="space-y-1">
                   <p className="text-sm font-medium text-muted-foreground">Status</p>
                   <p>
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        product.status === "Active"
-                          ? "bg-green-100 text-green-800"
-                          : product.status === "In Transit"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-gray-100 text-gray-800"
+                       "bg-green-100 text-green-800"
+                         
                       }`}
                     >
-                      {product.status}
+                      active
                     </span>
                   </p>
                 </div>
@@ -151,7 +136,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   <p className="text-sm font-medium text-muted-foreground">Harvest Date</p>
                   <p className="flex items-center">
                     <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
-                    {product.harvestDate}
+                    {product.createdAt}
                   </p>
                 </div>
               </div>
