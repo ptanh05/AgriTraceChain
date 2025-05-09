@@ -29,10 +29,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
     if (savedWalletType && savedWalletAddress) {
       setWalletType(savedWalletType)
-      setWalletAddress(savedBalance)
-      // In a real implementation, we would verify the connection is still valid
-      // and fetch the current balance
-      setBalance(savedBalance ? parseFloat(savedBalance) : null)
+      setWalletAddress(savedWalletAddress)
+      setBalance(savedBalance ? parseInt(savedBalance) : null)
     }
   }, [])
 
@@ -48,12 +46,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
       setWalletAddress(mockAddress)
       setWalletType(type)
-      setBalance(balance)
 
       // Save to localStorage for persistence
       localStorage.setItem("walletType", type)
       localStorage.setItem("walletAddress", mockAddress)
-      localStorage.setItem("balance", balance)
 
 
       // In a real implementation, we would also authenticate with the backend
